@@ -1,8 +1,9 @@
 import { database } from "../../database/index.js";
 
 export const del = (req, res) => {
-    const tasks = database.select('tasks');
+    const { id } = req.params
 
-    return res
-        .end(JSON.stringify(tasks))
+    database.delete('users', id)
+
+    return res.writeHead(204).end()
 }

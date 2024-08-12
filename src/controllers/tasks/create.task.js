@@ -1,10 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { database } from "../../database/index.js";
 
 export const create = (req, res) => {
     const { title, description } = req.body;
 
     const task = {
-        id: new randomUUID(),
+        id: randomUUID(),
         title,
         description,
         completed_at: null,

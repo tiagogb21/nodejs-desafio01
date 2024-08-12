@@ -1,20 +1,31 @@
-import 'dotenv/config'
+import "dotenv/config";
 import http from "http";
-import { taskRoutes } from './routes/task.js';
-import { json } from './middlewares/json.js';
+import { taskRoutes } from "./routes/tasks.js";
+import { json } from "./middlewares/json.js";
 
 const { PORT } = process.env;
 
 const server = http.createServer(async (req, res) => {
     const { method, url } = req;
 
-    json(req, res);
+    await json(req, res);
 
-    const taskRoute = taskRoutes.find((route) => route[method] === method && route[url] === url);
+    const taskRoute = taskRoutes.find((route) => {
+        return route.method === method && route.url.test(url);
+    });
 
-    console.log(taskRoute);
+    if(!taskRoute) return res.writeHead(404).end();
 
-    if(taskRoute) return taskRoute.handler(req, res);
+    if (taskRoute) {
+        const routeParams = req.url.match(taskRoute.path);
+
+        const { query, ...params } = routeParams.groups;
+
+        req.params = params;
+        req.query = query ? extractQueryParams(query) : {};
+
+        return route.handler(req, res);
+    }
 
     return res.writeHead(404).end();
 });
