@@ -6,7 +6,7 @@ export class Database {
     #database = {};
 
     constructor() {
-        fs.readFile(databasePath, "utf-8")
+        fs.readFile(databasePath, "utf8")
             .then((data) => {
                 this.#database = JSON.parse(data);
             })
@@ -16,17 +16,19 @@ export class Database {
     }
 
     #persist() {
-        fs.writeFile(databasePath, JSON.stringify(this.#database));
+        fs.writeFile(databasePath, JSON.stringify(this.#database, null, 2));
     }
 
     select(table, search) {
         let data = this.#database[table] ?? [];
 
-        if(search) {
-            data = Object.entries(search).some(([key, value]) => {
-                if(!value) return true;
+        if (search) {
+            data = data.filter((row) => {
+                return Object.entries(search).some(([key, value]) => {
+                    if (!value) return true;
 
-                return row[key].includes[value];
+                    return row[key].includes(value);
+                });
             });
         }
 
@@ -37,7 +39,7 @@ export class Database {
         if (Array.isArray(this.#database[table])) {
             this.#database[table].push(data);
         } else {
-            this.#database[table] = data;
+            this.#database[table] = [data];
         }
 
         this.#persist();
@@ -51,7 +53,8 @@ export class Database {
         );
 
         if (rowIndex > -1) {
-            this.#database[table][rowIndex] = { id, ...data };
+            const row = this.#database[table][rowIndex];
+            this.#database[table][rowIndex] = { id, ...row, ...data };
             this.#persist();
         }
     }

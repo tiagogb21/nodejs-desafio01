@@ -1,14 +1,22 @@
 import { database } from "../../database/index.js";
+import { validatePartialBody } from "../../middlewares/validatePartialBody.js";
 
 export const update = (req, res) => {
-    const {id} = req.params;
+    if(!req.body) return res
+        .writeHead(400)
+        .end(JSON.stringify({ message: "title or description are required" }));
 
-    const {title, description} = req.body;
+    const { id } = req.params;
+    const { title, description } = req.body;
+    const [task] = database.select('tasks', { id });
 
-    database.update('users', id, {
-        title,
-        description,
-    })
+    validatePartialBody(title, description);
 
-    return res.writeHead(204).end()
-}
+    database.update("tasks", id, {
+        title: title ?? task.title,
+        description: description ?? task.description,
+        updated_at: new Date(),
+    });
+
+    return res.writeHead(204).end();
+};

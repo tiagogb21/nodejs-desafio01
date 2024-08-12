@@ -17,14 +17,16 @@ const server = http.createServer(async (req, res) => {
     if(!taskRoute) return res.writeHead(404).end();
 
     if (taskRoute) {
-        const routeParams = req.url.match(taskRoute.path);
+        const routeParams = req.url.match(taskRoute.url);
 
-        const { query, ...params } = routeParams.groups;
+        if(routeParams.groups) {
+            const { query, ...params } = routeParams.groups;
 
-        req.params = params;
-        req.query = query ? extractQueryParams(query) : {};
+            req.params = params;
+            req.query = query ? extractQueryParams(query) : {};
+        }
 
-        return route.handler(req, res);
+        return taskRoute.handler(req, res);
     }
 
     return res.writeHead(404).end();

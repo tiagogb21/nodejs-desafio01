@@ -1,6 +1,8 @@
 import { database } from "../../database/index.js";
 
-export const patch = (req, res) => {
+export const updateComplete = (req, res) => {
+    const { id } = req.params
+
     const task = database.select('tasks', { id });
 
     const isTaskCompleted = Boolean(task.completed_at);
